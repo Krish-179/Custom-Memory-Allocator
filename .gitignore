@@ -1,0 +1,19 @@
+ompiled binaries
+*.o
+*.out
+test
+a.out
+
+# Debug symbols
+*.dSYM/
+*.pdb
+
+# Editor/OS junk
+*.swp
+*~
+.vscode/
+.idea/
+
+# Build directories (if you add one later)
+build/
+obj/
