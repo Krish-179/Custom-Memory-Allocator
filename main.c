@@ -5,6 +5,9 @@
 
 #define SECTION(name) printf("\n=== %s ===\n", name)
 
+
+// all tests are written by AI
+
 int main(void) {
 
   SECTION("1. Basic malloc + free");
