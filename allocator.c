@@ -1,4 +1,6 @@
+#include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #define CHUNK_SIZE (4 * 1024)
@@ -56,10 +58,11 @@ void *my_malloc(size_t size) {
         block->size = free_block->size - size - sizeof(header);
         block->prev_size = size;
         free_block->size = size;
-	header *after = (header *)((char *)block + sizeof(header) + block->size);
-	if ((void *)after != end){
-		after->prev_size = block->size;
-	}
+        header *after =
+            (header *)((char *)block + sizeof(header) + block->size);
+        if ((void *)after != end) {
+          after->prev_size = block->size;
+        }
       }
       free_block->flag = USED;
       return (void *)(free_block + 1);
@@ -116,6 +119,61 @@ void my_free(void *ptr) {
 
   h->flag = FREE;
 }
+
+void *my_calloc(size_t n_elements, size_t size) {
+  if (n_elements != 0 && size > (SIZE_MAX / n_elements)) {
+    printf("Error: calloc size overflow\n");
+    return NULL;
+  }
+  void *ptr = my_malloc(n_elements * size);
+  if (!ptr) {
+    printf("Error: Getting chunk from calloc\n");
+    return NULL;
+  }
+  memset(ptr, 0, n_elements * size);
+  return ptr;
+}
+
+void *my_realloc(void *ptr, size_t size) {
+  if (size == 0 && ptr) {
+    my_free(ptr);
+    return NULL;
+  } else if (size == 0) {
+    printf("Error: Size can't be zero\n");
+    return NULL;
+  } else if (!ptr) {
+    return my_malloc(size);
+  }
+  header *head = (header *)((char *)ptr - sizeof(header));
+  if (head->size >= size) {
+    size_t leftover = head->size - size;
+    if (leftover > sizeof(header)) {
+      header *block = (header *)((char *)head + sizeof(header) + size);
+      block->flag = FREE;
+      block->size = leftover - sizeof(header);
+      block->prev_size = size;
+      head->size = size;
+
+      header *after = (header *)((char *)block + sizeof(header) + block->size);
+      if ((void *)after != end) {
+        after->prev_size = block->size;
+      }
+    }
+    return ptr;
+
+  } else {
+    void *new_block = my_malloc(size);
+    if (!new_block) {
+      printf("Error: Getting new chunk from realloc\n");
+      return NULL;
+    } else {
+      memcpy(new_block, ptr, head->size);
+      my_free(ptr);
+      return new_block;
+    }
+  }
+}
+
 void print_blocks(void) {
   header *curr = start;
   int i = 0;
