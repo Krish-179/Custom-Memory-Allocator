@@ -33,6 +33,7 @@ Makefile — builds the project
 BUILD AND RUN
 
 make
+
 ./test
 
 Adjust ./test if your Makefile names the output binary something else.
