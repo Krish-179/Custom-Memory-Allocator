@@ -1,8 +1,7 @@
-ompiled binaries
+compiled binaries
 *.o
 *.out
 test
-a.out
 
 # Debug symbols
 *.dSYM/
